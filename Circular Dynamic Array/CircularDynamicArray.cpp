@@ -5,31 +5,36 @@ class CircularDynamicArray{
     CircularDynamicArray();
     CircularDynamicArray(int s);
     ~CircularDynamicArray();
-    CircularDynamicArray(const CircularDynamicArray &oldarray);
-    void operator=(const CircularDynamicArray &oldarray);
+    CircularDynamicArray(const CircularDynamicArray &oldArray);
+    void operator=(const CircularDynamicArray &oldArray);
     int &operator[] (int i);
     void addFront(T v);
     void addEnd(T v);
     void delFront();
     void delEnd();
+    int linearSearch(T e);
+    void merge(T arr[], int leftIndex, int midIndex, int rightIndex);
+    void mergeSort(T arr[], int leftIndex, int rightIndex);
+    void stableSort();
     int length();
     int capacity();
-    T *cdarray;
-    T *oldarray;
+    T *cdArray;
+    T *oldArray;
     private:
-    int arrcapacity;
-    int arrsize;
+    int arrCapacity;
+    int arrSize;
     int frontIndex;
     int endIndex;
+    T error;
 
 };
 
 template <class T>
 CircularDynamicArray<T>::CircularDynamicArray(){
     //Array of type T is created, room for 2 items.
-    cdarray = new T[2];
-    arrcapacity = 2;
-    arrsize = 0;
+    cdArray = new T[2];
+    arrCapacity = 2;
+    arrSize = 0;
     frontIndex = 0;
     endIndex = 1;
 }
@@ -37,109 +42,113 @@ CircularDynamicArray<T>::CircularDynamicArray(){
 template <class T>
 CircularDynamicArray<T>::CircularDynamicArray(int s){
     //Array of type T is created, room for s items.
-    cdarray = new T[s];
-    arrcapacity = s;
-    arrsize = s;
+    cdArray = new T[s];
+    arrCapacity = s;
+    arrSize = s;
     frontIndex = 0;
-    endIndex = arrsize - 1;
+    endIndex = arrSize - 1;
 }
 
 template <class T>
 CircularDynamicArray<T>::~CircularDynamicArray(){
-    delete cdarray;
+    delete cdArray;
 }
 
 template <class T>
-CircularDynamicArray<T>::CircularDynamicArray(const CircularDynamicArray &oldarray){
-    cdarray = new T[arrcapacity];
+CircularDynamicArray<T>::CircularDynamicArray(const CircularDynamicArray &oldArray){
+    cdArray = new T[arrCapacity];
 
-    for(int i = 0; i < arrsize; i++){
-        cout << cdarray[i] << " placed at index " << ((frontIndex+i) % oldarray.arrcapacity) << endl;
-        cdarray[i] = oldarray[(frontIndex + i) % oldarray.arrcapacity()];
+    for(int i = 0; i < arrSize; i++){
+        cout << cdArray[i] << " placed at index " << ((frontIndex+i) % oldArray.arrCapacity) << endl;
+        cdArray[i] = oldArray[(frontIndex + i) % oldArray.arrCapacity()];
     }
 }
 
 template <class T>
-void CircularDynamicArray<T>::operator=(const CircularDynamicArray &oldarray){
-    cdarray = new T[arrcapacity];
-
-    for(int i = 0; i < arrsize; i++){
-        cout << cdarray[i] << " placed at index " << ((frontIndex+i) % oldarray.arrcapacity) << endl;
-        cdarray[i] = oldarray[(frontIndex + i) % oldarray.arrcapacity()];
+void CircularDynamicArray<T>::operator=(const CircularDynamicArray &oldArray){
+    cdArray = new T[arrCapacity];
+    arrSize = oldArray.arrSize;
+    arrCapacity = oldArray.arrCapacity;
+    frontIndex = oldArray.frontIndex;
+    endIndex = oldArray.endIndex;
+    for(int i = 0; i < arrCapacity; i++){
+        //cout << cdArray[i] << " placed at index " << i << endl;
+        cdArray[i] = oldArray.cdArray[i];
     }
 }
 
 template <class T>
 int &CircularDynamicArray<T>::operator[](int i){
-    if(i >= arrcapacity){
-        cout << "Out of bounds." << endl;
+    if(i >= arrCapacity){
+        cout << "Out of bounds reference: " << i << endl;
+        return error;
     }
-    return cdarray[(frontIndex+i)%arrcapacity];
+    return cdArray[(frontIndex+i)%arrCapacity];
 }
 
 template <class T>
 void CircularDynamicArray<T>::addFront(T v){
-    arrsize++;
+    arrSize++;
     //Checks if the array is over capacity.
     //If it isn't:
-    if(arrsize <= arrcapacity){
+    if(arrSize <= arrCapacity){
         if(frontIndex == 0){
-            frontIndex = arrcapacity - 1;
+            frontIndex = arrCapacity - 1;
         }
         else{
             frontIndex--;
         }
-        cdarray[frontIndex] = v;
+        cdArray[frontIndex] = v;
     }
     else{
-        arrcapacity = arrcapacity * 2;
-        T *temparray = new T[arrcapacity];
-        for(int i = 0; i < arrsize-1; i++){
-            //cout << cdarray[i] << " placed at index " << ((frontIndex+i) % (arrcapacity/2)) << endl;
-            temparray[i+1] = cdarray[(frontIndex + i) % (arrcapacity/2)];
+        arrCapacity = arrCapacity * 2;
+        T *tempArray = new T[arrCapacity];
+        for(int i = 0; i < arrSize-1; i++){
+            //cout << cdArray[i] << " placed at index " << ((frontIndex+i) % (arrCapacity/2)) << endl;
+            tempArray[i+1] = cdArray[(frontIndex + i) % (arrCapacity/2)];
         }
-        cdarray = new T[arrcapacity];
-        for(int i = 0; i < arrsize; i++){
-            cdarray[i] = temparray[i];
+        cdArray = new T[arrCapacity];
+        for(int i = 0; i < arrSize; i++){
+            cdArray[i] = tempArray[i];
         }
-        cdarray[0] = v;
-        delete temparray;
+        cdArray[0] = v;
+        delete tempArray;
         frontIndex = 0;
-        endIndex = arrsize - 1;
+        endIndex = arrSize - 1;
 
     };
 }
 
 template <class T>
 void CircularDynamicArray<T>::addEnd(T v){
-    arrsize++;
+    arrSize++;
     //Checks if the array is over capacity.
     //If it isn't:
-    if(arrsize <= arrcapacity){
-        if(endIndex + 1 >= arrcapacity){
+    if(arrSize <= arrCapacity){
+        if(endIndex + 1 >= arrCapacity){
             endIndex = 0;
         }
         else{
             endIndex++;
         }
-        cdarray[endIndex] = v;
+        cdArray[endIndex] = v;
         //cout << v << " inserted." << endl;
     }
     else{
-        arrcapacity = arrcapacity * 2;
-        T *temparray = new T[arrcapacity];
-        for(int i = 0; i < arrsize; i++){
-            //cout << cdarray[i] << " placed at index " << ((frontIndex+i) % (arrcapacity/2)) << endl;
-            temparray[i] = cdarray[(frontIndex + i) % (arrcapacity/2)];
+        arrCapacity = arrCapacity * 2;
+        T *tempArray = new T[arrCapacity];
+        for(int i = 0; i < arrSize; i++){
+            //cout << cdArray[i] << " placed at index " << ((frontIndex+i) % (arrCapacity/2)) << endl;
+            tempArray[i] = cdArray[(frontIndex + i) % (arrCapacity/2)];
         }
-        cdarray = new T[arrcapacity];
-        for(int i = 0; i < arrsize; i++){
-            cdarray[i] = temparray[i];
+        cdArray = new T[arrCapacity];
+        for(int i = 0; i < arrSize; i++){
+            cdArray[i] = tempArray[i];
         }
-        cdarray[arrsize - 1] = v;
-        delete temparray;
+        cdArray[arrSize - 1] = v;
+        delete tempArray;
         frontIndex = 0;
-        endIndex = arrsize - 1;
+        endIndex = arrSize - 1;
 
     };
 }
@@ -147,51 +156,130 @@ void CircularDynamicArray<T>::addEnd(T v){
 template <class T>
 void CircularDynamicArray<T>::delFront(){
     frontIndex++;
-    arrsize--;
-    if(arrcapacity/arrsize >= 4){
+    arrSize--;
+    if(arrCapacity/arrSize >= 4){
         //cout << "Shrinking from the front." << endl;
-        T *temparray = new T[arrcapacity];
-        for(int i = 0; i < arrsize; i++){
-            temparray[i] = cdarray[(frontIndex + i) % (arrcapacity)];
+        T *tempArray = new T[arrCapacity];
+        for(int i = 0; i < arrSize; i++){
+            tempArray[i] = cdArray[(frontIndex + i) % (arrCapacity)];
         }
-        arrcapacity = arrcapacity/2;
+        arrCapacity = arrCapacity/2;
         frontIndex = 0;
-        endIndex = arrsize - 1;
-        cdarray = new T[arrcapacity];
-        for(int i = 0; i < arrsize; i++){
-            cdarray[i] = temparray[i];
+        endIndex = arrSize - 1;
+        cdArray = new T[arrCapacity];
+        for(int i = 0; i < arrSize; i++){
+            cdArray[i] = tempArray[i];
         }
-        delete temparray;
+        delete tempArray;
     }
 }
 
 template <class T>
 void CircularDynamicArray<T>::delEnd(){
     endIndex--;
-    arrsize--;
-    if(arrcapacity/arrsize >= 4){
+    arrSize--;
+    if(arrCapacity/arrSize >= 4){
     //cout << "Shrinking from the back." << endl;
-    T *temparray = new T[arrcapacity];
-    for(int i = 0; i < arrsize; i++){
-        temparray[i] = cdarray[(frontIndex + i) % (arrcapacity)];
+    T *tempArray = new T[arrCapacity];
+    for(int i = 0; i < arrSize; i++){
+        tempArray[i] = cdArray[(frontIndex + i) % (arrCapacity)];
     }
-    arrcapacity = arrcapacity/2;
+    arrCapacity = arrCapacity/2;
     frontIndex = 0;
-    endIndex = arrsize - 1;
-    cdarray = new T[arrcapacity];
-    for(int i = 0; i < arrsize; i++){
-        cdarray[i] = temparray[i];
+    endIndex = arrSize - 1;
+    cdArray = new T[arrCapacity];
+    for(int i = 0; i < arrSize; i++){
+        cdArray[i] = tempArray[i];
     }
-    delete temparray;
+    delete tempArray;
     }
+}
+
+template <class T>
+int CircularDynamicArray<T>::linearSearch(T e){
+    for(int i = 0; i < arrSize - 1; i++){
+        if(cdArray[(frontIndex + i) % (arrCapacity)] == e){
+            return i;
+        }
+    }
+    return -1;
+}
+
+template <class T>
+void CircularDynamicArray<T>::merge(T arr[], int leftIndex, int midIndex, int rightIndex){
+    //Creating temporary arrays.
+    int leftHalfSize = midIndex - leftIndex + 1;
+    int rightHalfSize = rightIndex - midIndex;
+    T leftTemp[leftHalfSize], rightTemp[rightHalfSize];
+
+    int subIndexL, subIndexR, subIndexMerged;
+    //Copying data to temporary arrays.
+    for(subIndexL = 0; subIndexL < leftHalfSize; subIndexL++){
+        leftTemp[subIndexL] = arr[leftIndex + subIndexL];
+    }
+
+    for(subIndexR = 0; subIndexR < rightHalfSize; subIndexR++){
+        rightTemp[subIndexR] = arr[midIndex + subIndexR + 1];
+    }
+    //Initial indices of the subarrays.
+    subIndexL = 0;
+    subIndexR = 0;
+    subIndexMerged = leftIndex;
+
+    //Merge the subarrays back into the original array
+    while(subIndexL < leftHalfSize && subIndexR < rightHalfSize){
+        if(leftTemp[subIndexL] <= rightTemp[subIndexR]){
+            arr[subIndexMerged] = leftTemp[subIndexL];
+            subIndexL++;
+        }
+        else{
+            arr[subIndexMerged] = rightTemp[subIndexR];
+            subIndexR++;
+        }
+        subIndexMerged++;
+    }
+
+    //Whatever remains in the left array is copied into the original array.
+    while(subIndexL < leftHalfSize){
+        arr[subIndexMerged] = leftTemp[subIndexL];
+        subIndexL++;
+        subIndexMerged++;
+    }
+
+    //Same for the right array.
+    while(subIndexR < rightHalfSize){
+        arr[subIndexMerged] = rightTemp[subIndexR];
+        subIndexR++;
+        subIndexMerged++;
+    }
+}
+
+template <class T>
+void CircularDynamicArray<T>::mergeSort(T arr[], int leftIndex, int rightIndex){
+    if(leftIndex < rightIndex){
+        //Finds the midpoint.
+        int midPoint = leftIndex + (rightIndex - leftIndex) / 2;
+
+        //Sorts both halves.
+        mergeSort(arr, leftIndex, midPoint);
+        mergeSort(arr, midPoint+1, rightIndex);
+
+        //Merges the two halves.
+        merge(arr, leftIndex, midPoint, rightIndex); 
+    }
+}
+
+template <class T>
+void CircularDynamicArray<T>::stableSort(){
+    mergeSort(cdArray, frontIndex, endIndex);
 }
 
 template <class T>
 int CircularDynamicArray<T>::length(){
-    return arrsize;
+    return arrSize;
 }
 
 template <class T>
 int CircularDynamicArray<T>::capacity(){
-    return arrcapacity;
+    return arrCapacity;
 }
